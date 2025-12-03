@@ -127,7 +127,7 @@ class Environment {
     }
 
     update(dt: seconds) {
-        for (let bullet of this.bullets) {
+        for (const bullet of this.bullets) {
             bullet.update(dt)
         }
     }
@@ -170,10 +170,18 @@ class GunPhysicsSimulation extends Simulation {
         const rows = Math.min(this.environment.bullets.length, stdout.rows)
         for (let i = 0; i < rows; i++) {            
             const bullet = this.environment.bullets[i]
-            let x = bullet?.x.toFixed(2)
-            let y = bullet?.y.toFixed(2)
-            let vx = bullet?.vx.toFixed(2)
-            let vy = bullet?.vy.toFixed(2)
+            const x = bullet?.x.toFixed(2)
+            const y = bullet?.y.toFixed(2)
+            const vx = bullet?.vx.toFixed(2)
+            const vy = bullet?.vy.toFixed(2)
+            
+            // TODO: Test whether the non-null assertion is valid for this code
+            // const bullet = this.environment.bullets[i]!
+            // const x = bullet.x.toFixed(2)
+            // const y = bullet.y.toFixed(2)
+            // const vx = bullet.vx.toFixed(2)
+            // const vy = bullet.vy.toFixed(2)
+
             stdout.cursorTo(0, i)
             stdout.write(`${i}. x: ${x}, y: ${y}, vx: ${vx}, vy: ${vy}`)
             stdout.clearLine(1)
