@@ -49,6 +49,41 @@ class PhysicalObject {
 }
 
 
+abstract class Simulation {
+    private readonly frameTimer = new Stopwatch()
+    private accumulator = 0
+    
+    start() {
+        this.init()
+        this.frameTimer.restart()
+        this.loop()
+        this.shutdown()
+    }
+    
+    abstract shutdown(): void
+    abstract init(): void
+    abstract update(dt: seconds): void
+    abstract draw(): void
+
+    static readonly FRAMES_PER_SECOND = 24
+    static readonly SECONDS_PER_TICK = 1 / Simulation.FRAMES_PER_SECOND
+
+    private loop() {
+        this.accumulator += this.frameTimer.time()
+        this.frameTimer.restart()
+        
+        while (this.accumulator >= Simulation.SECONDS_PER_TICK) {
+            this.update(Simulation.SECONDS_PER_TICK)
+            this.accumulator -= Simulation.SECONDS_PER_TICK
+        }
+        
+        this.draw()
+        
+        setImmediate(() => this.loop())
+    }
+}
+
+
 class Bullet extends PhysicalObject {
     constructor(height: meters, horizontalVelocity: meterspersec) {
         super(0, height, horizontalVelocity, 0)
@@ -95,41 +130,6 @@ class Environment {
         for (let bullet of this.bullets) {
             bullet.update(dt)
         }
-    }
-}
-
-
-abstract class Simulation {
-    private readonly frameTimer = new Stopwatch()
-    private accumulator = 0
-    
-    start() {
-        this.init()
-        this.frameTimer.restart()
-        this.loop()
-        this.shutdown()
-    }
-    
-    abstract shutdown(): void
-    abstract init(): void
-    abstract update(dt: seconds): void
-    abstract draw(): void
-
-    static readonly FRAMES_PER_SECOND = 24
-    static readonly SECONDS_PER_TICK = 1 / Simulation.FRAMES_PER_SECOND
-
-    private loop() {
-        this.accumulator += this.frameTimer.time()
-        this.frameTimer.restart()
-        
-        while (this.accumulator >= Simulation.SECONDS_PER_TICK) {
-            this.update(Simulation.SECONDS_PER_TICK)
-            this.accumulator -= Simulation.SECONDS_PER_TICK
-        }
-        
-        this.draw()
-        
-        setImmediate(() => this.loop())
     }
 }
 
