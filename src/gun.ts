@@ -178,7 +178,7 @@ class GunPhysicsSimulation extends Simulation {
         stdout.uncork()
     }
 
-    shutdown(): void {
+    shutdown() {
         stdout.write("\x1b[?25h")
     }
 }
