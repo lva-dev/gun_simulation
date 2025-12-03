@@ -3,14 +3,14 @@ import { stdout } from "node:process"
 type seconds = number
 
 class Stopwatch  {
-    private _start: seconds = 0
+    private start: seconds = 0
     
     restart() {
-        this._start = performance.now() / 1000
+        this.start = performance.now() / 1000
     }
 
     time(): seconds {
-        return performance.now() / 1000 - this._start
+        return performance.now() / 1000 - this.start
     }
 }
 
@@ -79,19 +79,19 @@ class Gun {
 
 class Environment {
     readonly bullets: Bullet[]
-    private gun: Gun
+    private readonly gun: Gun
 
-    constructor(gunMuzzleVelocity: number) {
+    constructor(gunMuzzleVelocity: meterspersec) {
         this.gun = new Gun(gunMuzzleVelocity)
         this.bullets = []
     }
 
-    shootGun(height: number) {
+    shootGun(height: meters) {
         const bullet = this.gun.shoot(height)
         this.bullets.push(bullet)
     }
 
-    update(dt: number) {
+    update(dt: seconds) {
         for (let bullet of this.bullets) {
             bullet.update(dt)
         }
@@ -100,7 +100,7 @@ class Environment {
 
 
 abstract class Simulation {
-    private frameTimer = new Stopwatch()
+    private readonly frameTimer = new Stopwatch()
     private accumulator = 0
     
     start() {
@@ -136,8 +136,7 @@ abstract class Simulation {
 
 class GunPhysicsSimulation extends Simulation {
     readonly shotChancePerSec
-    private environment: Environment
-    private shootEventTimer = 0
+    private readonly environment: Environment
     
     constructor(environment: Environment, shotChancePerSec: number) {
         super()
