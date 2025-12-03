@@ -76,7 +76,7 @@ class Gun {
     }
 }
 
-
+// TODO: Rename this class to GunEnvironment
 class Environment {
     readonly bullets: Bullet[]
     private readonly gun: Gun
@@ -110,10 +110,10 @@ abstract class Simulation {
         this.shutdown()
     }
     
+    abstract shutdown(): void
     abstract init(): void
     abstract update(dt: seconds): void
     abstract draw(): void
-    abstract shutdown(): void
 
     static readonly FRAMES_PER_SECOND = 24
     static readonly SECONDS_PER_TICK = 1 / Simulation.FRAMES_PER_SECOND
@@ -149,6 +149,10 @@ class GunPhysicsSimulation extends Simulation {
         stdout.cursorTo(0, 0)
         stdout.clearScreenDown()
     }
+
+    shutdown() {
+        stdout.write("\x1b[?25h")
+    }
     
     update(dt: seconds) {
         const shotChance = 1 - Math.pow(1 - this.shotChancePerSec, dt)
@@ -176,10 +180,6 @@ class GunPhysicsSimulation extends Simulation {
         }
         
         stdout.uncork()
-    }
-
-    shutdown() {
-        stdout.write("\x1b[?25h")
     }
 }
 
