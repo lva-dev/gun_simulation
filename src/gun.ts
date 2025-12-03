@@ -6,11 +6,11 @@ class Stopwatch  {
     private _start: seconds = 0
     
     restart() {
-        this._start = performance.now()
+        this._start = performance.now() / 1000
     }
 
     time(): seconds {
-        return performance.now() - this._start
+        return performance.now() / 1000 - this._start
     }
 }
 
@@ -31,7 +31,7 @@ class PhysicalObject {
         this.vy = vy
     }
 
-    static readonly GRAVITY_ACCELERATION = -9.81;
+    static readonly GRAVITY_ACCELERATION = -9.81
 
     update(dt: seconds) {
         if (this.y > 0) {
@@ -55,6 +55,10 @@ class Bullet extends PhysicalObject {
     }
 
     update(dt: seconds) {
+        if (this.y == 0) {
+            this.vx = 0
+        }
+        
         super.update(dt)
     }
 }
@@ -88,27 +92,31 @@ class Environment {
     }
 
     update(dt: number) {
-        this.bullets.forEach((bullet) => {
+        for (let bullet of this.bullets) {
             bullet.update(dt)
-        })
+        }
     }
 }
 
 
 abstract class Simulation {
-    private accumulator = 0
     private frameTimer = new Stopwatch()
-    
-    static readonly FRAMES_PER_SECOND = 5
-    static readonly SECONDS_PER_TICK = 1 / Simulation.FRAMES_PER_SECOND
+    private accumulator = 0
     
     start() {
+        this.init()
         this.frameTimer.restart()
         this.loop()
+        this.shutdown()
     }
     
+    abstract init(): void
     abstract update(dt: seconds): void
     abstract draw(): void
+    abstract shutdown(): void
+
+    static readonly FRAMES_PER_SECOND = 24
+    static readonly SECONDS_PER_TICK = 1 / Simulation.FRAMES_PER_SECOND
 
     private loop() {
         this.accumulator += this.frameTimer.time()
@@ -127,19 +135,25 @@ abstract class Simulation {
 
 
 class GunPhysicsSimulation extends Simulation {
-    readonly shotChancePerSec;
+    readonly shotChancePerSec
     private environment: Environment
-    private eventTimer = 0;
+    private shootEventTimer = 0
     
     constructor(environment: Environment, shotChancePerSec: number) {
         super()
         this.environment = environment    
-        this.shotChancePerSec = shotChancePerSec;
+        this.shotChancePerSec = shotChancePerSec
+    }
+    
+    init() {
+        stdout.write("\x1b[?25l")
+        stdout.cursorTo(0, 0)
+        stdout.clearScreenDown()
     }
     
     update(dt: seconds) {
-        let shoot_chance = 1 - Math.pow(1 - this.shotChancePerSec, dt);
-        if (Math.random() < shoot_chance) {
+        const shotChance = 1 - Math.pow(1 - this.shotChancePerSec, dt)
+        if (Math.random() < shotChance) {
             this.environment.shootGun(100)
         }
         
@@ -148,28 +162,32 @@ class GunPhysicsSimulation extends Simulation {
     
     draw() {
         stdout.cork()
+        stdout.cursorTo(0, 0)
         
-        stdout.write("\x1b[2J\x1b[H")
-        if (stdout)
-        for (let i = 0; i < this.environment.bullets.length; i++) {
-            if (i >= stdout.rows) {
-                break;
-            }
-            
-            let bullet = this.environment.bullets[i];
-            stdout.write(`${i}. x: ${bullet?.x}, y: ${bullet?.y}, vx: ${bullet?.vx}, vy: ${bullet?.vy}\n`)
+        const rows = Math.min(this.environment.bullets.length, stdout.rows)
+        for (let i = 0; i < rows; i++) {            
+            const bullet = this.environment.bullets[i]
+            let x = bullet?.x.toFixed(2)
+            let y = bullet?.y.toFixed(2)
+            let vx = bullet?.vx.toFixed(2)
+            let vy = bullet?.vy.toFixed(2)
+            stdout.cursorTo(0, i)
+            stdout.write(`${i}. x: ${x}, y: ${y}, vx: ${vx}, vy: ${vy}`)
+            stdout.clearLine(1)
         }
-        // this.environment.bullets.forEach((bullet, i) => {
-        //     stdout.write(`${i}. x: ${bullet.x}, y: ${bullet.y}, vx: ${bullet.vx}, vy: ${bullet.vy}\n`)
-        // })
         
         stdout.uncork()
     }
+
+    shutdown(): void {
+        stdout.write("\x1b[?25h")
+    }
 }
 
+
 function main() {
-    let coltM1911Env = new Environment(253)
-    let sim = new GunPhysicsSimulation(coltM1911Env, 0.20)
+    const coltM1911Env = new Environment(253)
+    const sim = new GunPhysicsSimulation(coltM1911Env, 0.50)
     sim.start()
 }
 
