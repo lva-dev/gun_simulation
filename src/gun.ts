@@ -165,7 +165,7 @@ class GunPhysicsSimulation extends Simulation {
     
     draw() {
         stdout.cork()
-        stdout.cursorTo(0, 0) // TODO: Verify the necessity moving the cursor
+        stdout.cursorTo(0, 0) // TODO: Verify the necessity of moving the cursor
         
         const rows = Math.min(this.environment.bullets.length, stdout.rows)
         for (let i = 0; i < rows; i++) {            
