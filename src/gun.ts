@@ -2,18 +2,6 @@ import { stdout } from "node:process"
 
 type seconds = number
 
-/**
- * Sleeps for `time` seconds
- * @param ms milliseconds to sleep
- * @returns a void promise
- * @author GeeksForGeeks,
- *  https://www.geeksforgeeks.org/typescript/how-to-implement-sleep-function-in-typescript
- */
-async function sleep(time: seconds): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, time * 1000))
-}
-
-
 class Stopwatch  {
     private _start: seconds = 0
     
@@ -28,15 +16,15 @@ class Stopwatch  {
 
 
 type meters = number
-type velocity = number
+type meterspersec = number
 
 class PhysicalObject {
     x: meters
     y: meters
-    vx: velocity
-    vy: velocity
+    vx: meterspersec
+    vy: meterspersec
     
-    constructor(x: meters, y: meters, vx: velocity, vy: velocity) {
+    constructor(x: meters, y: meters, vx: meterspersec, vy: meterspersec) {
         this.x = x
         this.y = y
         this.vx = vx
@@ -62,7 +50,7 @@ class PhysicalObject {
 
 
 class Bullet extends PhysicalObject {
-    constructor(height: meters, horizontalVelocity: velocity) {
+    constructor(height: meters, horizontalVelocity: meterspersec) {
         super(0, height, horizontalVelocity, 0)
     }
 
@@ -73,9 +61,9 @@ class Bullet extends PhysicalObject {
 
 
 class Gun {
-    muzzleVelocity: velocity
+    muzzleVelocity: meterspersec
 
-    constructor(muzzleVelocity: velocity) {
+    constructor(muzzleVelocity: meterspersec) {
         this.muzzleVelocity = muzzleVelocity    
     }
 
@@ -86,8 +74,8 @@ class Gun {
 
 
 class Environment {
-    private gun: Gun
     readonly bullets: Bullet[]
+    private gun: Gun
 
     constructor(gunMuzzleVelocity: number) {
         this.gun = new Gun(gunMuzzleVelocity)
@@ -139,8 +127,8 @@ abstract class Simulation {
 
 
 class GunPhysicsSimulation extends Simulation {
-    environment: Environment
     readonly shotChancePerSec;
+    private environment: Environment
     private eventTimer = 0;
     
     constructor(environment: Environment, shotChancePerSec: number) {
